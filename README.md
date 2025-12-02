@@ -49,6 +49,19 @@ The tool will:
 - Use cached dependencies when available (fast!)
 - Fetch and cache dependencies when needed (slow first time, fast afterwards)
 
+### Cleaning Old Caches
+
+To remove all cached entries that don't match your current `elm.json`:
+
+```bash
+npx elm-dep-cache --clean
+```
+
+This is useful when:
+- You've changed your `elm.json` multiple times and want to clean up old caches
+- You want to free up disk space by removing unused dependency caches
+- Your cache directory has accumulated many old versions
+
 ## Cache Location
 
 Dependencies are cached in `./.elm-dep-cache/{checksum}/` relative to your project directory.
@@ -63,6 +76,8 @@ You can commit this directory to version control, or add it to your CI cache con
 
 ## Example Output
 
+### Normal Run
+
 ```
 [elm-dep-cache] Starting elm-dep-cache
 [elm-dep-cache] elm.json checksum: a3f2c8b1...
@@ -72,6 +87,20 @@ You can commit this directory to version control, or add it to your CI cache con
 [elm-dep-cache] Restoring Elm dependencies from cache: ./.elm-dep-cache/a3f2c8b1...
 [elm-dep-cache] ✓ Successfully restored dependencies from cache
 [elm-dep-cache] ✓ Done! Dependencies restored from cache.
+```
+
+### Clean Run
+
+```
+[elm-dep-cache] Starting elm-dep-cache
+[elm-dep-cache] elm.json checksum: a3f2c8b1...
+[elm-dep-cache] Cleaning old cache entries...
+[elm-dep-cache]   Removing old cache: b4e7d9a2...
+[elm-dep-cache]   Removing old cache: c8f1e3b5...
+[elm-dep-cache]   Keeping current cache: a3f2c8b1...
+[elm-dep-cache] ✓ Cleaned 2 old cache entries
+[elm-dep-cache] ✓ Kept 1 current cache entry
+[elm-dep-cache] ✓ Done!
 ```
 
 ## CI/CD Integration Examples

@@ -175,7 +175,69 @@ function cacheElmHome(cacheDir, elmHome) {
   }
 }
 
+function removeDirectory(dirPath) {
+  if (fs.existsSync(dirPath)) {
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(dirPath, entry.name);
+
+      if (entry.isDirectory()) {
+        removeDirectory(fullPath);
+      } else {
+        fs.unlinkSync(fullPath);
+      }
+    }
+
+    fs.rmdirSync(dirPath);
+  }
+}
+
+function cleanOldCaches(currentChecksum) {
+  log("Cleaning old cache entries...");
+
+  const cacheBaseDir = path.join(process.cwd(), CACHE_PREFIX);
+
+  if (!fs.existsSync(cacheBaseDir)) {
+    log("No cache directory found, nothing to clean");
+    return;
+  }
+
+  try {
+    const entries = fs.readdirSync(cacheBaseDir, { withFileTypes: true });
+    let removedCount = 0;
+    let keptCount = 0;
+
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        const checksumDir = entry.name;
+
+        if (checksumDir !== currentChecksum) {
+          const fullPath = path.join(cacheBaseDir, checksumDir);
+          log(`  Removing old cache: ${checksumDir}`);
+          removeDirectory(fullPath);
+          removedCount++;
+        } else {
+          log(`  Keeping current cache: ${checksumDir}`);
+          keptCount++;
+        }
+      }
+    }
+
+    log(`✓ Cleaned ${removedCount} old cache ${removedCount === 1 ? "entry" : "entries"}`);
+    if (keptCount > 0) {
+      log(`✓ Kept ${keptCount} current cache ${keptCount === 1 ? "entry" : "entries"}`);
+    }
+  } catch (err) {
+    error(`Failed to clean caches: ${err.message}`);
+  }
+}
+
 function main() {
+  // Parse command line arguments
+  const args = process.argv.slice(2);
+  const cleanMode = args.includes("--clean");
+
   log("Starting elm-dep-cache");
 
   // Check if elm.json exists
@@ -188,6 +250,13 @@ function main() {
   // Calculate checksum
   const checksum = calculateChecksum(elmJsonPath);
   log(`elm.json checksum: ${checksum}`);
+
+  // If clean mode, remove old caches and exit
+  if (cleanMode) {
+    cleanOldCaches(checksum);
+    log("✓ Done!");
+    process.exit(0);
+  }
 
   // Determine cache directory
   const cacheDir = path.join(process.cwd(), CACHE_PREFIX, checksum);

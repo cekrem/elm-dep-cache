@@ -1,6 +1,6 @@
 {
   "name": "elm-dep-cache",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Cache Elm dependencies to avoid CI/CD connection timeouts",
   "main": "index.js",
   "bin": {
