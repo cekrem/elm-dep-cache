@@ -1,0 +1,29 @@
+{
+  "name": "elm-dep-cache",
+  "version": "1.0.0",
+  "description": "Cache Elm dependencies to avoid CI/CD connection timeouts",
+  "main": "index.js",
+  "bin": {
+    "elm-dep-cache": "./index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "elm",
+    "dependencies",
+    "cache",
+    "ci",
+    "cd"
+  ],
+  "author": "Christian Ekrem",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cekrem/elm-dep-cache.git"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {}
+}
