@@ -58,6 +58,7 @@ npx elm-dep-cache --clean
 ```
 
 This is useful when:
+
 - You've changed your `elm.json` multiple times and want to clean up old caches
 - You want to free up disk space by removing unused dependency caches
 - Your cache directory has accumulated many old versions
@@ -136,26 +137,71 @@ build:
     command: elm make src/Main.elm --output=main.js
 ```
 
-## Committing Cache to Git
+## Caching Strategies
 
-If you want to commit the cache to your repository:
+### Option 1: Commit Cache to Git
+
+Commit the cache directly to your repository:
 
 ```bash
 git add .elm-dep-cache
 git commit -m "Add Elm dependencies cache"
 ```
 
-This ensures the cache is available immediately on CI without any downloads.
+**Pros:** Cache is immediately available on CI without extra configuration.
+**Cons:** Increases repository size.
 
-## Adding to .gitignore
+### Option 2: Use CI Cache
 
-If you prefer to use CI's caching mechanism instead:
+Add to `.gitignore`:
 
 ```
 .elm-dep-cache/
 ```
 
-Then configure your CI to cache the `.elm-dep-cache` directory.
+Then configure your CI to cache the `.elm-dep-cache` directory between builds:
+
+**GitHub Actions:**
+
+```yaml
+- name: Cache Elm dep-cache
+  uses: actions/cache@v4
+  with:
+    path: .elm-dep-cache
+    key: elm-dep-cache-${{ hashFiles('elm.json') }}
+
+- name: Install Elm dependencies
+  run: npx elm-dep-cache
+```
+
+**GitLab CI:**
+
+```yaml
+cache:
+  paths:
+    - .elm-dep-cache/
+  key:
+    files:
+      - elm.json
+```
+
+**CircleCI:**
+
+```yaml
+- restore_cache:
+    keys:
+      - elm-dep-cache-{{ checksum "elm.json" }}
+
+- run: npx elm-dep-cache
+
+- save_cache:
+    key: elm-dep-cache-{{ checksum "elm.json" }}
+    paths:
+      - .elm-dep-cache
+```
+
+**Pros:** Keeps repository small.
+**Cons:** Requires CI cache configuration.
 
 ## License
 
